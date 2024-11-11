@@ -1,0 +1,2 @@
+# Wiki-CS
+python main.py -dataset wikics -ntrials 10 -sparse 1 -epochs 1500 -cl_batch_size 3000 -nlayers_proj 1 -alpha 0.1 -k 30 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.5 -dropedge_rate_2 0.5 -lr_disc 0.001 -eval_freq 50
