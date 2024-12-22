@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch.nn import Sequential, Linear, ReLU
 
+import GCL.losses as L
 from GCL.losses import Loss
 from GCL.losses.infonce import _similarity
 from GCL.models import get_sampler
@@ -31,6 +32,7 @@ class Normalize(torch.nn.Module):
         return self.norm(x)
 
 
+# 单层GCN后接batch norm，加预测头
 class GConv(torch.nn.Module):
     def __init__(self, nlayers, nlayers_proj, in_dim, emb_dim, proj_dim, dropout, sparse, batch_size):
         super(GConv, self).__init__()
@@ -98,6 +100,7 @@ class Encoder(torch.nn.Module):
             adj_hp += torch.eye(self.nnodes).cuda()
             adj_hp = normalize_adj(adj_hp, 'sym', self.sparse)
 
+            # Note: 这里的mask是GREET中设置掩膜参数的，可调，如果不需要掩膜，可以直接减adj_hp
             mask = torch.zeros(adj_lp.shape).cuda()
             mask[edges[0], edges[1]] = 1.
             mask.requires_grad = False
@@ -124,147 +127,84 @@ class Encoder(torch.nn.Module):
         adj1_lp, adj1_hp = self.get_adj(edge_index1)
         adj2_lp, adj2_hp = self.get_adj(edge_index2)
 
-        h1, h1_online = self.online_encoder(x1, adj1_lp, edge_weight1)
-        h2, h2_online = self.online_encoder(x2, adj2_lp, edge_weight2)
-
-        h1_pred = self.predictor(h1_online)
-        h2_pred = self.predictor(h2_online)
+        h1_lp, h1_lp_online = self.online_encoder(x1, adj1_lp, edge_weight1)
+        h1_hp, h1_hp_online = self.online_encoder(x1, adj1_hp, edge_weight1)
+        
+        h1_lp_pred = self.predictor(h1_lp_online)
+        h1_hp_pred = self.predictor(h1_hp_online)
 
         with torch.no_grad():
-            _, h1_target = self.get_target_encoder()(x1, adj1_lp, edge_weight1)
-            _, h2_target = self.get_target_encoder()(x2, adj2_lp, edge_weight2)
+            _, h2_lp_target = self.get_target_encoder()(x2, adj2_lp, edge_weight2)
+            _, h2_hp_target = self.get_target_encoder()(x2, adj2_hp, edge_weight2)
+        
+        return h1_lp, h1_hp, h1_lp_pred, h1_hp_pred, h2_lp_target, h2_hp_target
 
-        return h1, h2, h1_pred, h2_pred, h1_target, h2_target
 
 
+# class MultiViewContrast(torch.nn.Module):
+#     def __init__(self, loss, intra_loss, beta, mode='L2L'):
+#         super(MultiViewContrast, self).__init__()
+#         self.loss = loss
+#         self.intra_loss = intra_loss
+#         self.beta = beta
+#         self.mode = mode
+#         self.sampler = get_sampler(mode, intraview_negs=False)
 
-class MultiViewContrast(torch.nn.Module):
-    def __init__(self, loss, intra_loss, beta, mode='L2L'):
-        super(MultiViewContrast, self).__init__()
-        self.loss = loss
-        self.intra_loss = intra_loss
-        self.beta = beta
-        self.mode = mode
-        self.sampler = get_sampler(mode, intraview_negs=False)
+#     def forward(self, h1_pred=None, h2_pred=None, h1_target=None, h2_target=None,
+#                 g1_pred=None, g2_pred=None, g1_target=None, g2_target=None,
+#                 batch=None, extra_pos_mask=None):
+#         assert all(v is not None for v in [h1_pred, h2_pred, h1_target, h2_target])
+#         anchor1, sample1, pos_mask, neg_mask = self.sampler(anchor=h1_pred, sample=h2_target)
+#         anchor2, sample2 = h2_pred, h1_target
 
-    def forward(self, h1_pred=None, h2_pred=None, h1_target=None, h2_target=None,
-                g1_pred=None, g2_pred=None, g1_target=None, g2_target=None,
-                batch=None, extra_pos_mask=None):
-        assert all(v is not None for v in [h1_pred, h2_pred, h1_target, h2_target])
-        anchor1, sample1, pos_mask, neg_mask = self.sampler(anchor=h1_pred, sample=h2_target)
-        anchor2, sample2 = h2_pred, h1_target
+#         loss_cn_1 = self.loss(anchor=anchor1, sample=sample1, pos_mask=pos_mask, neg_mask=neg_mask)
+#         loss_cn_2 = self.loss(anchor=anchor2, sample=sample2, pos_mask=pos_mask, neg_mask=neg_mask)
+#         cross_network_loss = (loss_cn_1 + loss_cn_2) * 0.5
 
-        loss_cn_1 = self.loss(anchor=anchor1, sample=sample1, pos_mask=pos_mask, neg_mask=neg_mask)
-        loss_cn_2 = self.loss(anchor=anchor2, sample=sample2, pos_mask=pos_mask, neg_mask=neg_mask)
-        cross_network_loss = (loss_cn_1 + loss_cn_2) * 0.5
+#         inter_anchor1, inter_sample1 = h1_pred, h2_pred
+#         inter_anchor2, inter_sample2 = h2_pred, h1_pred
+#         loss_inter_1 = self.loss(anchor=inter_anchor1, sample=inter_sample1, pos_mask=pos_mask, neg_mask=neg_mask)
+#         loss_inter_2 = self.loss(anchor=inter_anchor2, sample=inter_sample2, pos_mask=pos_mask, neg_mask=neg_mask)
 
-        inter_anchor1, inter_sample1 = h1_pred, h2_pred
-        inter_anchor2, inter_sample2 = h2_pred, h1_pred
-        loss_inter_1 = self.loss(anchor=inter_anchor1, sample=inter_sample1, pos_mask=pos_mask, neg_mask=neg_mask)
-        loss_inter_2 = self.loss(anchor=inter_anchor2, sample=inter_sample2, pos_mask=pos_mask, neg_mask=neg_mask)
+#         intra_anchor1, intra_sample1 = h1_pred, h2_pred
+#         intra_anchor2, intra_sample2 = h1_pred, h2_pred
+#         loss_intra_1 = self.intra_loss(anchor=intra_anchor1, sample=intra_sample1, pos_mask=pos_mask, neg_mask=neg_mask)
+#         loss_intra_2 = self.intra_loss(anchor=intra_anchor2, sample=intra_sample2, pos_mask=pos_mask, neg_mask=neg_mask)
 
-        intra_anchor1, intra_sample1 = h1_pred, h2_pred
-        intra_anchor2, intra_sample2 = h1_pred, h2_pred
-        loss_intra_1 = self.intra_loss(anchor=intra_anchor1, sample=intra_sample1, pos_mask=pos_mask, neg_mask=neg_mask)
-        loss_intra_2 = self.intra_loss(anchor=intra_anchor2, sample=intra_sample2, pos_mask=pos_mask, neg_mask=neg_mask)
+#         cross_view_loss = (loss_inter_1 + loss_inter_2 + loss_intra_1 + loss_intra_2) * 0.5
 
-        cross_view_loss = (loss_inter_1 + loss_inter_2 + loss_intra_1 + loss_intra_2) * 0.5
-
-        return self.beta * cross_view_loss + (1 - self.beta) * cross_network_loss
+#         return self.beta * cross_view_loss + (1 - self.beta) * cross_network_loss
     
-class IntraInfoNCE(Loss):
-    def __init__(self, tau):
-        super(IntraInfoNCE, self).__init__()
-        self.tau = tau
+# class IntraInfoNCE(Loss):
+#     def __init__(self, tau):
+#         super(IntraInfoNCE, self).__init__()
+#         self.tau = tau
 
-    def compute(self, anchor, sample, pos_mask, neg_mask, *args, **kwargs):
-        self_view_sim = _similarity(anchor, anchor) / self.tau
-        cross_view_sim = _similarity(anchor, sample) / self.tau
-        exp_sim = torch.exp(cross_view_sim) * pos_mask + torch.exp(self_view_sim) * neg_mask
-        log_prob = cross_view_sim - torch.log(exp_sim.sum(dim=1, keepdim=True))
-        loss = log_prob * pos_mask
-        loss = loss.sum(dim=1) / pos_mask.sum(dim=1)
-        return -loss.mean()
+#     def compute(self, anchor, sample, pos_mask, neg_mask, *args, **kwargs):
+#         self_view_sim = _similarity(anchor, anchor) / self.tau
+#         cross_view_sim = _similarity(anchor, sample) / self.tau
+#         exp_sim = torch.exp(cross_view_sim) * pos_mask + torch.exp(self_view_sim) * neg_mask
+#         log_prob = cross_view_sim - torch.log(exp_sim.sum(dim=1, keepdim=True))
+#         loss = log_prob * pos_mask
+#         loss = loss.sum(dim=1) / pos_mask.sum(dim=1)
+#         return -loss.mean()
     
 
-# class GCL(nn.Module):
-#     def __init__(self, nlayers, nlayers_proj, in_dim, emb_dim, proj_dim, dropout, sparse, batch_size):
-#         super(GCL, self).__init__()
 
-#         self.encoder1 = SGC(nlayers, in_dim, emb_dim, dropout, sparse)
-#         self.encoder2 = SGC(nlayers, in_dim, emb_dim, dropout, sparse)
+class CrossViewContrast(torch.nn.Module):
+    def __init__(self):
+        super(CrossViewContrast, self).__init__()
+        self.loss = L.BootstrapLatent()
+        self.sampler = get_sampler('L2L', intraview_negs=False)
 
-#         if nlayers_proj == 1:
-#             self.proj_head1 = Sequential(Linear(emb_dim, proj_dim))
-#             self.proj_head2 = Sequential(Linear(emb_dim, proj_dim))
-#         elif nlayers_proj == 2:
-#             self.proj_head1 = Sequential(Linear(emb_dim, proj_dim), ReLU(inplace=True), Linear(proj_dim, proj_dim))
-#             self.proj_head2 = Sequential(Linear(emb_dim, proj_dim), ReLU(inplace=True), Linear(proj_dim, proj_dim))
-
-#         self.batch_size = batch_size
+    def forward(self, h_pred, h_target):
+        anchor, sample, pos_mask, _ = self.sampler(anchor=h_pred, sample=h_target)
+        l = self.loss(anchor=anchor, sample=sample, pos_mask=pos_mask)
+        return l
 
 
-#     def get_embedding(self, x, a1, a2, source='all'):
-#         emb1 = self.encoder1(x, a1)
-#         emb2 = self.encoder2(x, a2)
-#         return torch.cat((emb1, emb2), dim=1)
 
-
-#     def get_projection(self, x, a1, a2):
-#         emb1 = self.encoder1(x, a1)
-#         emb2 = self.encoder2(x, a2)
-#         proj1 = self.proj_head1(emb1)
-#         proj2 = self.proj_head2(emb2)
-#         return torch.cat((proj1, proj2), dim=1)
-
-
-#     def forward(self, x1, a1, x2, a2):
-#         emb1 = self.encoder1(x1, a1)
-#         emb2 = self.encoder2(x2, a2)
-#         proj1 = self.proj_head1(emb1)
-#         proj2 = self.proj_head2(emb2)
-#         loss = self.batch_nce_loss(proj1, proj2)
-#         return loss
-
-    # def batch_nce_loss(self, z1, z2, temperature=0.2, pos_mask=None, neg_mask=None):
-    #     if pos_mask is None and neg_mask is None:
-    #         pos_mask = self.pos_mask
-    #         neg_mask = self.neg_mask
-
-    #     nnodes = z1.shape[0]
-    #     if (self.batch_size == 0) or (self.batch_size > nnodes):
-    #         loss_0 = self.infonce(z1, z2, pos_mask, neg_mask, temperature)
-    #         loss_1 = self.infonce(z2, z1, pos_mask, neg_mask, temperature)
-    #         loss = (loss_0 + loss_1) / 2.0
-    #     else:
-    #         node_idxs = list(range(nnodes))
-    #         random.shuffle(node_idxs)
-    #         batches = split_batch(node_idxs, self.batch_size)
-    #         loss = 0
-    #         for b in batches:
-    #             weight = len(b) / nnodes
-    #             loss_0 = self.infonce(z1[b], z2[b], pos_mask[:,b][b,:], neg_mask[:,b][b,:], temperature)
-    #             loss_1 = self.infonce(z2[b], z1[b], pos_mask[:,b][b,:], neg_mask[:,b][b,:], temperature)
-    #             loss += (loss_0 + loss_1) / 2.0 * weight
-    #     return loss
-
-
-    # def infonce(self, anchor, sample, pos_mask, neg_mask, tau):
-    #     pos_mask = pos_mask.cuda()
-    #     neg_mask = neg_mask.cuda()
-    #     sim = self.similarity(anchor, sample) / tau
-    #     exp_sim = torch.exp(sim) * neg_mask
-    #     log_prob = sim - torch.log(exp_sim.sum(dim=1, keepdim=True))
-    #     loss = log_prob * pos_mask
-    #     loss = loss.sum(dim=1) / pos_mask.sum(dim=1)
-    #     return -loss.mean()
-
-
-    # def similarity(self, h1: torch.Tensor, h2: torch.Tensor):
-    #     h1 = F.normalize(h1)
-    #     h2 = F.normalize(h2)
-    #     return h1 @ h2.t()
-
+# 单层GCN，不带激活函数，先对x激活
 class SGC(nn.Module):
     def __init__(self, nlayers, in_dim, emb_dim, dropout, sparse):
         super(SGC, self).__init__()

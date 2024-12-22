@@ -32,8 +32,14 @@ def setup_seed(seed):
 def train(encoder_model, contrast_model, features, edges, optimizer):
     encoder_model.train()
     optimizer.zero_grad()
-    _, _, h1_pred, h2_pred, h1_target, h2_target = encoder_model(features, edges)
-    loss = contrast_model(h1_pred=h1_pred, h2_pred=h2_pred, h1_target=h1_target.detach(), h2_target=h2_target.detach())
+
+    _, _, h1_lp_pred, h1_hp_pred, h2_lp_target, h2_hp_target = encoder_model(features, edges)
+    l1 = contrast_model(h_pred = h1_lp_pred, h_target = h2_lp_target.detach())
+    l2 = contrast_model(h_pred = h1_hp_pred, h_target = h2_hp_target.detach())
+    cross_view_loss = l1 + l2
+    cross_pass_loss = contrast_model(h_pred = h1_lp_pred, h_target = h1_hp_pred)
+    loss = cross_view_loss + cross_pass_loss
+    
     loss.backward()
     optimizer.step()
     encoder_model.update_target_encoder(0.99)
@@ -56,7 +62,7 @@ def main(args):
         # gconv = GConv(input_dim=nfeats, hidden_dim=256, num_layers=2).to(device)
         gconv = GConv(nlayers=args.nlayers_enc, nlayers_proj=args.nlayers_proj, in_dim=nfeats, emb_dim=args.emb_dim, proj_dim=args.proj_dim, dropout=args.dropout, sparse=args.sparse, batch_size=args.cl_batch_size).to(device)
         encoder_model = Encoder(encoder=gconv, augmentor1=aug1, augmentor2=aug2, nnodes=nnodes, hidden_dim=args.proj_dim, sparse=args.sparse, dropout=args.dropout).to(device)
-        contrast_model = MultiViewContrast(loss=L.InfoNCE(tau=0.2), intra_loss=IntraInfoNCE(tau=0.2), beta=0.2, mode='L2L').to(device)
+        contrast_model = CrossViewContrast().to(device)
         optimizer = Adam(encoder_model.parameters(), lr=0.01)
 
         features = features.to(device)
@@ -72,8 +78,8 @@ def main(args):
 
             if epoch % args.eval_freq == 0:
                 encoder_model.eval()
-                h1, h2, _, _, _, _ = encoder_model(features, edges)
-                z = torch.cat([h1, h2], dim=1)
+                h_lp, h_hp, _, _, _, _ = encoder_model(features, edges)
+                z = torch.cat([h_lp, h_hp], dim=1)
                 
                 # adj_1, adj_2, _, _ = discriminator(torch.cat((features, str_encodings), 1), edges)
                 # embedding = cl_model.get_embedding(features, adj_1, adj_2)
