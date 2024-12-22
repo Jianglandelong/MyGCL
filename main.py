@@ -40,47 +40,6 @@ def train(encoder_model, contrast_model, features, edges, optimizer):
     return loss.item()
 
 
-# def train_cl(cl_model, discriminator, optimizer_cl, features, str_encodings, edges):
-
-#     cl_model.train()
-#     discriminator.eval()
-
-#     adj_1, adj_2, weights_lp, _ = discriminator(torch.cat((features, str_encodings), 1), edges)
-#     features_1, adj_1, features_2, adj_2 = augmentation(features, adj_1, features, adj_2, args, cl_model.training)
-#     cl_loss = cl_model(features_1, adj_1, features_2, adj_2)
-
-#     optimizer_cl.zero_grad()
-#     cl_loss.backward()
-#     optimizer_cl.step()
-
-#     return cl_loss.item()
-
-
-# def main():
-#     device = torch.device('cuda')
-#     path = osp.join(osp.expanduser('~'), 'datasets', 'WikiCS')
-#     dataset = WikiCS(path, transform=T.NormalizeFeatures())
-#     data = dataset[0].to(device)
-
-#     aug1 = A.Compose([A.EdgeRemoving(pe=0.5), A.FeatureMasking(pf=0.1)])
-#     aug2 = A.Compose([A.EdgeRemoving(pe=0.5), A.FeatureMasking(pf=0.1)])
-
-#     gconv = GConv(input_dim=dataset.num_features, hidden_dim=256, num_layers=2).to(device)
-#     encoder_model = Encoder(encoder=gconv, augmentor=(aug1, aug2), hidden_dim=256).to(device)
-#     contrast_model = MultiViewContrast(loss=L.InfoNCE(tau=0.2), intra_loss=IntraInfoNCE(tau=0.2), beta=0.2, mode='L2L').to(device)
-
-#     optimizer = Adam(encoder_model.parameters(), lr=0.01)
-
-#     with tqdm(total=100, desc='(T)') as pbar:
-#         for epoch in range(1, 101):
-#             loss = train(encoder_model, contrast_model, data, optimizer)
-#             pbar.set_postfix({'loss': loss})
-#             pbar.update()
-
-#     test_result = test(encoder_model, data)
-#     print(f'(E): Best test F1Mi={test_result["micro_f1"]:.4f}, F1Ma={test_result["macro_f1"]:.4f}')
-
-
 def main(args):
     device = torch.device('cuda')
 
@@ -94,15 +53,11 @@ def main(args):
     for trial in range(args.ntrials):
         setup_seed(trial)
 
-        gconv = GConv(input_dim=nfeats, hidden_dim=256, num_layers=2).to(device)
-        encoder_model = Encoder(encoder=gconv, augmentor1=aug1, augmentor2=aug2, hidden_dim=256).to(device)
+        # gconv = GConv(input_dim=nfeats, hidden_dim=256, num_layers=2).to(device)
+        gconv = GConv(nlayers=args.nlayers_enc, nlayers_proj=args.nlayers_proj, in_dim=nfeats, emb_dim=args.emb_dim, proj_dim=args.proj_dim, dropout=args.dropout, sparse=args.sparse, batch_size=args.cl_batch_size).to(device)
+        encoder_model = Encoder(encoder=gconv, augmentor1=aug1, augmentor2=aug2, nnodes=nnodes, hidden_dim=args.proj_dim, sparse=args.sparse, dropout=args.dropout).to(device)
         contrast_model = MultiViewContrast(loss=L.InfoNCE(tau=0.2), intra_loss=IntraInfoNCE(tau=0.2), beta=0.2, mode='L2L').to(device)
-
         optimizer = Adam(encoder_model.parameters(), lr=0.01)
-
-        # cl_model = GCL(nlayers=args.nlayers_enc, nlayers_proj=args.nlayers_proj, in_dim=nfeats, emb_dim=args.emb_dim,
-        #             proj_dim=args.proj_dim, dropout=args.dropout, sparse=args.sparse, batch_size=args.cl_batch_size).to(device)
-        # optimizer_cl = torch.optim.Adam(cl_model.parameters(), lr=args.lr_gcl, weight_decay=args.w_decay)
 
         features = features.to(device)
         # str_encodings = str_encodings.to(device)
@@ -153,6 +108,7 @@ if __name__ == '__main__':
     parser.add_argument('-cl_rounds', type=int, default=2)
     parser.add_argument('-w_decay', type=float, default=0.0)
     parser.add_argument('-dropout', type=float, default=0.5)
+    # parser.add_argument('-subgraph', type=bool, default=False)
 
     # DISC Module - Hyper-param
     parser.add_argument('-alpha', type=float, default=0.1)

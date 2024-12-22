@@ -58,9 +58,14 @@ def normalize_adj(adj, mode, sparse=False):
         return torch.sparse.FloatTensor(adj.indices(), new_values, adj.size())
 
 
-def get_adj_from_edges(edges, weights, nnodes):
+# def get_adj_from_edges(edges, weights, nnodes):
+#     adj = torch.zeros(nnodes, nnodes).cuda()
+#     adj[edges[0], edges[1]] = weights
+#     return adj
+
+def get_adj_from_edges(edges, nnodes):
     adj = torch.zeros(nnodes, nnodes).cuda()
-    adj[edges[0], edges[1]] = weights
+    adj[edges[0], edges[1]] = 1
     return adj
 
 
@@ -154,3 +159,7 @@ def eval_test_mode(embedding, labels, train_mask, val_mask, test_mask):
 
     return acc_test * 100, acc_val * 100
 
+def extract_subgraph(edges, node_indices):
+    mask = torch.isin(edges[0], node_indices) & torch.isin(edges[1], node_indices)
+    subgraph_edges = edges[:, mask]
+    return subgraph_edges

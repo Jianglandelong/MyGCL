@@ -6,6 +6,7 @@ import os
 import torch_geometric.transforms as T
 from torch_geometric.datasets import Planetoid, WikipediaNetwork, Actor, WebKB, Amazon, Coauthor, WikiCS
 from torch_geometric.utils import remove_self_loops
+from torch.utils.data import DataLoader, TensorDataset
 
 warnings.simplefilter("ignore")
 
@@ -66,6 +67,75 @@ def get_structural_encoding(edges, nnodes, str_enc_dim=16):
     return SE
 
 
+# def load_data(dataset_name, subgraph=False, batch_size=5000):
+
+#     path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '.', 'data', dataset_name)
+
+#     if dataset_name in ['cora', 'citeseer', 'pubmed']:
+#         dataset = Planetoid(path, dataset_name)
+#     elif dataset_name in ['chameleon']:
+#         dataset = WikipediaNetwork(path, dataset_name)
+#     elif dataset_name in ['squirrel']:
+#         dataset = WikipediaNetwork(path, dataset_name, transform=T.NormalizeFeatures())
+#     elif dataset_name in ['actor']:
+#         dataset = Actor(path)
+#     elif dataset_name in ['cornell', 'texas', 'wisconsin']:
+#         dataset = WebKB(path, dataset_name)
+#     elif dataset_name in ['computers', 'photo']:
+#         dataset = Amazon(path, dataset_name, transform=T.NormalizeFeatures())
+#     elif dataset_name in ['cs', 'physics']:
+#         dataset = Coauthor(path, dataset_name, transform=T.NormalizeFeatures())
+#     elif dataset_name in ['wikics']:
+#         dataset = WikiCS(path)
+
+#     data = dataset[0]
+
+#     edges = remove_self_loops(data.edge_index)[0]
+
+#     features = data.x
+#     [nnodes, nfeats] = features.shape
+#     nclasses = torch.max(data.y).item() + 1
+
+#     if dataset_name in ['computers', 'photo', 'cs', 'physics', 'wikics']:
+#         train_mask, val_mask, test_mask = get_split(nnodes)
+#     else:
+#         train_mask, val_mask, test_mask = data.train_mask, data.val_mask, data.test_mask
+
+#     if len(train_mask.shape) < 2:
+#         train_mask = train_mask.unsqueeze(1)
+#         val_mask = val_mask.unsqueeze(1)
+#         test_mask = test_mask.unsqueeze(1)
+
+#     labels = data.y
+
+#     path = '../data/se/{}'.format(dataset_name)
+#     if not os.path.exists(path):
+#         os.makedirs(path)
+#     file_name = path + '/{}_{}.pt'.format(dataset_name, 16)
+#     if os.path.exists(file_name):
+#         se = torch.load(file_name)
+#         # print('Load exist structural encoding.')
+#     else:
+#         print('Computing structural encoding...')
+#         se = get_structural_encoding(edges, nnodes)
+#         torch.save(se, file_name)
+#         print('Done. The structural encoding is saved as: {}.'.format(file_name))
+
+#     train_dataset = TensorDataset(features[train_mask.squeeze()], labels[train_mask.squeeze()])
+#     val_dataset = TensorDataset(features[val_mask.squeeze()], labels[val_mask.squeeze()])
+#     test_dataset = TensorDataset(features[test_mask.squeeze()], labels[test_mask.squeeze()])
+
+#     if subgraph:
+#         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+#         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+#         test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+#     else:
+#         train_loader = DataLoader(train_dataset, batch_size=len(train_dataset), shuffle=False)
+#         val_loader = DataLoader(val_dataset, batch_size=len(val_dataset), shuffle=False)
+#         test_loader = DataLoader(test_dataset, batch_size=len(test_dataset), shuffle=False)
+
+#     return train_loader, val_loader, test_loader, edges, se, nnodes, nfeats, nclasses
+
 def load_data(dataset_name):
 
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '.', 'data', dataset_name)
@@ -121,6 +191,4 @@ def load_data(dataset_name):
         print('Done. The structural encoding is saved as: {}.'.format(file_name))
 
     return features, edges, se, train_mask, val_mask, test_mask, labels, nnodes, nfeats
-
-
 
