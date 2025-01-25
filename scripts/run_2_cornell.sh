@@ -1,5 +1,5 @@
 # Cornell
-python main_log.py -dataset cornell -ntrials 3000 -sparse 0 -epochs 400 -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0004 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
+python main.py -dataset cornell -ntrials 8 -sparse 0 -epochs 400 -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0001 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
 
 # Run:4 | ACC:63.51+-9.46 | -alpha 0.2 -beta 0.8 -gamma 0.0
 # Run:4 | ACC:67.57+-8.76 | -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0004 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1 ***
@@ -14,20 +14,7 @@ python main_log.py -dataset cornell -ntrials 3000 -sparse 0 -epochs 400 -nlayers
 # Run:8 | ACC:62.16+-6.19 | -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0001 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
 # Run:8 | ACC:66.22+-7.15 | -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0001 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
 # Run:8 | ACC:62.16+-6.19 | -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0001 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
-# Run:8 | ACC:63.85+-6.33 | -nlayers_enc 2 -emb_dim 256 -nlayers_proj 1 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
-# Run:8 | ACC:63.51+-6.76 | -nlayers_enc 2 -emb_dim 512 -nlayers_proj 1 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0004 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
-# Run:8 | ACC:63.51+-7.28 | -nlayers_enc 2 -emb_dim 512 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0004 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
-# Run:8 | ACC:60.47+-5.88 | -nlayers_enc 2 -emb_dim 128 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0004 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
-# Run:8 | ACC:66.22+-7.15 | -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.002 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
-# Run:8 | ACC:66.22+-7.15 | -lr 0.005
-# Run:8 | ACC:66.22+-7.15 | -lr 0.01
-# Run:8 | ACC:66.22+-7.15 | -lr 0.02 
-# Run:8 | ACC:66.22+-7.15 | -lr 0.04 
-# Run:8 | ACC:66.22+-7.15 | -lr 0.08
 
-# GREET: Run:10 | ACC:74.32+-4.23 | top: 81.08
-
-# Run:8 | ACC:66.22+-7.15 | -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
 # Trial:0 | ACC:67.57
 # Trial:1 | ACC:56.76
 # Trial:2 | ACC:81.08 ***

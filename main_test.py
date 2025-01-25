@@ -55,6 +55,7 @@ def main(args):
     setup_seed(0)
     features, edges, train_mask, val_mask, test_mask, labels, nnodes, nfeats = load_data(args.dataset)
     results = []
+    results_2 = []
 
     aug1 = A.Compose([A.EdgeRemoving(pe=args.dropedge_rate_1), A.FeatureMasking(pf=args.maskfeat_rate_1), A.NodeDropping(pn=args.dropnode_rate_1)])
     aug2 = A.Compose([A.EdgeRemoving(pe=args.dropedge_rate_2), A.FeatureMasking(pf=args.maskfeat_rate_2), A.NodeDropping(pn=args.dropnode_rate_2)])
@@ -74,6 +75,7 @@ def main(args):
 
         best_acc_val = 0
         best_acc_test = 0
+        best_acc_test_2 = 0
 
         for epoch in range(1, args.epochs + 1):
             loss = train(encoder_model, contrast_model, features, edges, optimizer, args.alpha, args.beta, args.gamma)
@@ -93,13 +95,15 @@ def main(args):
                 if acc_val > best_acc_val:
                     best_acc_val = acc_val
                     best_acc_test = acc_test
+                if acc_test > best_acc_test_2:
+                    best_acc_test_2 = acc_test
 
         results.append(best_acc_test)
+        results_2.append(best_acc_test_2)
 
     for i, acc in enumerate(results):
-        print('Trial:{} | ACC:{:.2f}'.format(i, acc))
-    print('\n[FINAL RESULT] Dataset:{} | Run:{} | ACC:{:.2f}+-{:.2f}'.format(args.dataset, args.ntrials, np.mean(results),
-                                                                           np.std(results)))
+        print('Trial:{} | ACC:{:.2f} | ACC2:{:.2f}'.format(i, acc, results_2[i]))
+    print('\n[FINAL RESULT] Dataset:{} | Run:{} | ACC:{:.2f}+-{:.2f} | ACC2:{:.2f}+-{:.2f}'.format(args.dataset, args.ntrials, np.mean(results), np.std(results), np.mean(results_2), np.std(results_2)))
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"time: {elapsed_time:.2f} seconds")

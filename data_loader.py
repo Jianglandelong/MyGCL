@@ -177,18 +177,18 @@ def load_data(dataset_name):
 
     labels = data.y
 
-    path = '../data/se/{}'.format(dataset_name)
-    if not os.path.exists(path):
-        os.makedirs(path)
-    file_name = path + '/{}_{}.pt'.format(dataset_name, 16)
-    if os.path.exists(file_name):
-        se = torch.load(file_name)
-        # print('Load exist structural encoding.')
-    else:
-        print('Computing structural encoding...')
-        se = get_structural_encoding(edges, nnodes)
-        torch.save(se, file_name)
-        print('Done. The structural encoding is saved as: {}.'.format(file_name))
+    # path = '../data/se/{}'.format(dataset_name)
+    # if not os.path.exists(path):
+    #     os.makedirs(path)
+    # file_name = path + '/{}_{}.pt'.format(dataset_name, 16)
+    # if os.path.exists(file_name):
+    #     se = torch.load(file_name)
+    #     # print('Load exist structural encoding.')
+    # else:
+    #     print('Computing structural encoding...')
+    #     se = get_structural_encoding(edges, nnodes)
+    #     torch.save(se, file_name)
+    #     print('Done. The structural encoding is saved as: {}.'.format(file_name))
 
-    return features, edges, se, train_mask, val_mask, test_mask, labels, nnodes, nfeats
+    return features, edges, train_mask, val_mask, test_mask, labels, nnodes, nfeats
 

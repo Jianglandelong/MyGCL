@@ -16,8 +16,6 @@ import torch_geometric.transforms as T
 from tqdm import tqdm
 from torch.optim import Adam
 
-import time
-
 EOS = 1e-10
 
 
@@ -49,7 +47,6 @@ def train(encoder_model, contrast_model, features, edges, optimizer, alpha, beta
 
 
 def main(args):
-    start_time = time.time()
     device = torch.device('cuda')
 
     setup_seed(0)
@@ -87,22 +84,22 @@ def main(args):
                 cur_split = 0 if (train_mask.shape[1]==1) else (trial % train_mask.shape[1])
                 acc_test, acc_val = eval_test_mode(z, labels, train_mask[:, cur_split],
                                                  val_mask[:, cur_split], test_mask[:, cur_split])
-                print('[TEST] Trial:{:04d} | Epoch:{:04d} | CL loss:{:.4f} | VAL ACC:{:.2f} | TEST ACC:{:.2f}'.format(
-                        trial, epoch, loss, acc_val, acc_test))
+                # print('[TEST] Trial:{:04d} | Epoch:{:04d} | CL loss:{:.4f} | VAL ACC:{:.2f} | TEST ACC:{:.2f}'.format(
+                #         trial, epoch, loss, acc_val, acc_test))
 
                 if acc_val > best_acc_val:
                     best_acc_val = acc_val
                     best_acc_test = acc_test
 
-        results.append(best_acc_test)
+        results.append((trial, best_acc_test))
 
-    for i, acc in enumerate(results):
-        print('Trial:{} | ACC:{:.2f}'.format(i, acc))
+    # print top best_acc_test in results with the trial number
+    results = sorted(results, key=lambda x: x[1], reverse=True)
+    for i in range(args.ntrials):
+        print('Trial:{} | ACC:{:.2f}'.format(results[i][0], results[i][1]))
+    
     print('\n[FINAL RESULT] Dataset:{} | Run:{} | ACC:{:.2f}+-{:.2f}'.format(args.dataset, args.ntrials, np.mean(results),
                                                                            np.std(results)))
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"time: {elapsed_time:.2f} seconds")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

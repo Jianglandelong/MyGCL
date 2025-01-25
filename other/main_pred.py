@@ -16,8 +16,6 @@ import torch_geometric.transforms as T
 from tqdm import tqdm
 from torch.optim import Adam
 
-import time
-
 EOS = 1e-10
 
 
@@ -49,7 +47,6 @@ def train(encoder_model, contrast_model, features, edges, optimizer, alpha, beta
 
 
 def main(args):
-    start_time = time.time()
     device = torch.device('cuda')
 
     setup_seed(0)
@@ -81,8 +78,8 @@ def main(args):
 
             if epoch % args.eval_freq == 0:
                 encoder_model.eval()
-                h_lp, h_hp, _, _, _, _ = encoder_model(features, edges)
-                z = torch.cat([h_lp * args.alpha, h_hp * args.beta], dim=1)
+                _, _, _, _, h2_lp_target, h2_hp_target = encoder_model(features, edges)
+                z = torch.cat([h2_lp_target * args.alpha, h2_hp_target * args.beta], dim=1)
                 
                 cur_split = 0 if (train_mask.shape[1]==1) else (trial % train_mask.shape[1])
                 acc_test, acc_val = eval_test_mode(z, labels, train_mask[:, cur_split],
@@ -100,9 +97,6 @@ def main(args):
         print('Trial:{} | ACC:{:.2f}'.format(i, acc))
     print('\n[FINAL RESULT] Dataset:{} | Run:{} | ACC:{:.2f}+-{:.2f}'.format(args.dataset, args.ntrials, np.mean(results),
                                                                            np.std(results)))
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"time: {elapsed_time:.2f} seconds")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

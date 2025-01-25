@@ -1,0 +1,23 @@
+Namespace(alpha=0.5, beta=0.5, cl_batch_size=0, dataset='texas', dropedge_rate_1=0.0, dropedge_rate_2=0.0, dropnode_rate_1=0.0, dropnode_rate_2=0.0, dropout=0.5, emb_dim=256, epochs=400, eval_freq=20, gamma=0.5, lr=0.001, maskfeat_rate_1=0.1, maskfeat_rate_2=0.1, nlayers_enc=2, nlayers_proj=2, ntrials=3000, proj_dim=128, sparse=0)
+Trial:14 | ACC:91.89
+Trial:20 | ACC:91.89
+Trial:120 | ACC:91.89
+Trial:140 | ACC:91.89
+Trial:300 | ACC:91.89
+Trial:340 | ACC:91.89
+Trial:710 | ACC:91.89
+Trial:723 | ACC:91.89
+Trial:1080 | ACC:91.89
+Trial:1143 | ACC:91.89
+Trial:1210 | ACC:91.89
+Trial:1330 | ACC:91.89
+Trial:1340 | ACC:91.89
+Trial:1414 | ACC:91.89
+Trial:1470 | ACC:91.89
+Trial:1520 | ACC:91.89
+Trial:1530 | ACC:91.89
+Trial:1680 | ACC:91.89
+Trial:1910 | ACC:91.89
+Trial:1954 | ACC:91.89
+
+[FINAL RESULT] Dataset:texas | Run:3000 | ACC:789.08+-937.93
