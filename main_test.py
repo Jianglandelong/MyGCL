@@ -90,8 +90,9 @@ def main(args):
                 cur_split = 0 if (train_mask.shape[1]==1) else (trial % train_mask.shape[1])
                 acc_test, acc_val = eval_test_mode(z, labels, train_mask[:, cur_split],
                                                  val_mask[:, cur_split], test_mask[:, cur_split])
-                print('[TEST] Trial:{:04d} | Epoch:{:04d} | CL loss:{:.4f} | VAL ACC:{:.2f} | TEST ACC:{:.2f}'.format(
-                        trial, epoch, loss, acc_val, acc_test))
+                if args.full_log == 1:
+                    print('[TEST] Trial:{:04d} | Epoch:{:04d} | CL loss:{:.4f} | VAL ACC:{:.2f} | TEST ACC:{:.2f}'.format(
+                            trial, epoch, loss, acc_val, acc_test))
 
                 if acc_val > best_acc_val:
                     best_acc_val = acc_val
@@ -148,6 +149,7 @@ if __name__ == '__main__':
     parser.add_argument('-dropedge_rate_2', type=float, default=0.1)
     parser.add_argument('-dropnode_rate_1', type=float, default=0.1)
     parser.add_argument('-dropnode_rate_2', type=float, default=0.1)
+    parser.add_argument('-full_log', type=int, default=1)
 
     args = parser.parse_args()
 

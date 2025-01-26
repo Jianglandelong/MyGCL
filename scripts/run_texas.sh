@@ -1,5 +1,5 @@
 # Texas
-python main_log.py -dataset texas -ntrials 3000 -sparse 0 -epochs 400 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.0 -dropedge_rate_2 0.0 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 10 -alpha 0.5 -beta 0.5 -gamma 0.5 -emb_dim 256
+python main_log.py -dataset texas -ntrials 8 -sparse 0 -epochs 400 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.0 -dropedge_rate_2 0.0 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 10 -alpha 0.5 -beta 0.5 -gamma 0.5 -emb_dim 256
 
 # ACC:85.14+-1.35 | -alpha 0.5 -beta 0.5 -gamma 0.5
 # Trial:0 | ACC:83.78
