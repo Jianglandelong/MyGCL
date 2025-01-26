@@ -1,5 +1,5 @@
 # CiteSeer
-python main.py -dataset citeseer -ntrials 8 -sparse 0 -epochs 400 -cl_batch_size 0 -nlayers_proj 2 -maskfeat_rate_1 0.4 -maskfeat_rate_2 0.4 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 10 -alpha 1.0 -beta 0.0 -gamma 0.0 -emb_dim 256
+python main_test.py -dataset citeseer -ntrials 8 -sparse 0 -epochs 400 -cl_batch_size 0 -nlayers_proj 2 -maskfeat_rate_1 0.5 -maskfeat_rate_2 0.5 -dropedge_rate_1 0.5 -dropedge_rate_2 0.5 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 10 -alpha 1.0 -beta 0.0 -gamma 0.0
 
 # GREET: Run:10 | ACC:73.18+-0.79
 

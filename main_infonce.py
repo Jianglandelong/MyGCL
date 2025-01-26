@@ -6,7 +6,7 @@ import dgl
 import random
 
 from data_loader import load_data
-from model import *
+from model_infonce import *
 from utils import *
 
 import GCL.losses as L
@@ -15,6 +15,7 @@ import torch_geometric.transforms as T
 
 from tqdm import tqdm
 from torch.optim import Adam
+from GCL.models import DualBranchContrast
 
 import time
 
@@ -35,16 +36,16 @@ def train(encoder_model, contrast_model, features, edges, optimizer, alpha, beta
     encoder_model.train()
     optimizer.zero_grad()
 
-    _, _, h1_lp_pred, h1_hp_pred, h2_lp_target, h2_hp_target = encoder_model(features, edges)
-    l1 = contrast_model(h_pred = h1_lp_pred, h_target = h2_lp_target.detach())
-    l2 = contrast_model(h_pred = h1_hp_pred, h_target = h2_hp_target.detach())
+    _, _, h1_lp_pred, h1_hp_pred, h2_lp_pred, h2_hp_pred = encoder_model(features, edges)
+    l1 = contrast_model(h1 = h1_lp_pred, h2 = h2_lp_pred)
+    l2 = contrast_model(h1 = h1_hp_pred, h2 = h2_hp_pred)
     cross_view_loss = l1 * alpha + l2 * beta
-    cross_pass_loss = contrast_model(h_pred = h1_lp_pred, h_target = h1_hp_pred)
+    cross_pass_loss = contrast_model(h1 = h1_lp_pred, h2 = h1_hp_pred)
     loss = cross_view_loss + cross_pass_loss * gamma
     
     loss.backward()
     optimizer.step()
-    encoder_model.update_target_encoder(0.0)
+    # encoder_model.update_target_encoder(0.0)
     return loss.item()
 
 
@@ -66,7 +67,7 @@ def main(args):
         # gconv = GConv(input_dim=nfeats, hidden_dim=256, num_layers=2).to(device)
         gconv = GConv(nlayers=args.nlayers_enc, nlayers_proj=args.nlayers_proj, in_dim=nfeats, emb_dim=args.emb_dim, proj_dim=args.proj_dim, dropout=args.dropout, sparse=args.sparse, batch_size=args.cl_batch_size).to(device)
         encoder_model = Encoder(encoder=gconv, augmentor1=aug1, augmentor2=aug2, nnodes=nnodes, hidden_dim=args.proj_dim, sparse=args.sparse, dropout=args.dropout).to(device)
-        contrast_model = CrossViewContrast().to(device)
+        contrast_model = DualBranchContrast(loss=L.InfoNCE(tau=0.2), mode='L2L').to(device)
         optimizer = Adam(encoder_model.parameters(), lr=0.001)
 
         features = features.to(device)

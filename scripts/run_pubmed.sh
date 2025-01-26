@@ -1,5 +1,5 @@
 # PubMed
-python main_test.py -dataset pubmed -ntrials 10 -sparse 1 -epochs 800 -cl_batch_size 5000 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -lr 0.001 -eval_freq 20 -alpha 1.0 -beta 0.0 -gamma 0.0
+python main_test.py -dataset pubmed -ntrials 8 -sparse 1 -epochs 800 -cl_batch_size 5000 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -lr 0.001 -eval_freq 20 -alpha 1.0 -beta 0.2 -gamma 0.0
 
 # Run:10 | ACC:79.62+-1.21 | ACC2:80.46+-1.08 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -lr 0.001 -eval_freq 20 -alpha 1.0 -beta 0.0 -gamma 0.0
 # Trial:0 | ACC:80.00 | ACC2:80.00

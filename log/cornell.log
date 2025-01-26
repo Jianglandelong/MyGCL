@@ -1,0 +1,13 @@
+python main_test.py -dataset cornell -ntrials 8 -sparse 0 -epochs 400 -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
+
+Trial:0 | ACC:67.57 | ACC2:72.97
+Trial:1 | ACC:51.35 | ACC2:62.16
+Trial:2 | ACC:70.27 | ACC2:75.68
+Trial:3 | ACC:70.27 | ACC2:70.27
+Trial:4 | ACC:64.86 | ACC2:70.27
+Trial:5 | ACC:59.46 | ACC2:62.16
+Trial:6 | ACC:64.86 | ACC2:70.27
+Trial:7 | ACC:62.16 | ACC2:62.16
+
+[FINAL RESULT] Dataset:cornell | Run:8 | ACC:63.85+-5.88 | ACC2:68.24+-5.01
+time: 193.29 seconds

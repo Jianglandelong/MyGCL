@@ -1,5 +1,5 @@
 # Cora
-python main.py -dataset cora -ntrials 8 -sparse 0 -epochs 400 -cl_batch_size 0 -nlayers_proj 2 -maskfeat_rate_1 0.4 -maskfeat_rate_2 0.4 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0001 -eval_freq 10 -alpha 1.0 -beta 0.2 -gamma 0.0 -emb_dim 256 -nlayers_enc 3
+python main_test.py -dataset cora -ntrials 8 -sparse 0 -epochs 400 -cl_batch_size 0 -nlayers_proj 1 -maskfeat_rate_1 0.4 -maskfeat_rate_2 0.4 -dropedge_rate_1 0.4 -dropedge_rate_2 0.4 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0005 -eval_freq 20 -alpha 1.0 -beta 0.0 -gamma 0.0 -emb_dim 256
 
 # time: 1382.82 seconds 8 trials
 # Trial:0 | ACC:79.30

@@ -1,5 +1,5 @@
 # Cornell
-python main_log.py -dataset cornell -ntrials 3000 -sparse 0 -epochs 400 -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0004 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
+python main_test.py -dataset cornell -ntrials 8 -sparse 0 -epochs 400 -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1
 
 # Run:4 | ACC:63.51+-9.46 | -alpha 0.2 -beta 0.8 -gamma 0.0
 # Run:4 | ACC:67.57+-8.76 | -nlayers_enc 2 -emb_dim 256 -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.2 -dropedge_rate_2 0.2 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.0004 -eval_freq 10 -alpha 0.1 -beta 0.8 -gamma 0.1 ***
