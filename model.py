@@ -69,7 +69,12 @@ class Encoder(torch.nn.Module):
         self.target_encoder = None
         self.augmentor1 = augmentor1
         self.augmentor2 = augmentor2
-        self.predictor = torch.nn.Sequential(
+        self.predictor1 = torch.nn.Sequential(
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            Normalize(hidden_dim, norm=predictor_norm),
+            torch.nn.PReLU(),
+            torch.nn.Dropout(dropout))
+        self.predictor2 = torch.nn.Sequential(
             torch.nn.Linear(hidden_dim, hidden_dim),
             Normalize(hidden_dim, norm=predictor_norm),
             torch.nn.PReLU(),
@@ -127,23 +132,26 @@ class Encoder(torch.nn.Module):
         adj1_lp, adj1_hp = self.get_adj(edge_index1)
         adj2_lp, adj2_hp = self.get_adj(edge_index2)
 
-        h1_lp, h1_lp_online = self.online_encoder(x1, adj1_lp, edge_weight1)
-        h1_hp, h1_hp_online = self.online_encoder(x1, adj1_hp, edge_weight1)
+        _, z1_lp = self.online_encoder(x1, adj1_lp, edge_weight1)
+        _, z1_hp = self.online_encoder(x1, adj1_hp, edge_weight1)
         
-        h1_lp_pred = self.predictor(h1_lp_online)
-        h1_hp_pred = self.predictor(h1_hp_online)
+        h1_lp = self.predictor1(z1_lp)
+        h1_hp = self.predictor1(z1_hp)
+
+        s1_lp = self.predictor2(z1_lp)
+        s1_hp = self.predictor2(z1_hp)
 
         with torch.no_grad():
-            _, h2_lp_target = self.get_target_encoder()(x2, adj2_lp, edge_weight2)
-            _, h2_hp_target = self.get_target_encoder()(x2, adj2_hp, edge_weight2)
+            _, z2_lp = self.get_target_encoder()(x2, adj2_lp, edge_weight2)
+            _, z2_hp = self.get_target_encoder()(x2, adj2_hp, edge_weight2)
         
-        return h1_lp, h1_hp, h1_lp_pred, h1_hp_pred, h2_lp_target, h2_hp_target
+        return h1_lp, h1_hp, s1_lp, s1_hp, z2_lp, z2_hp
 
     def get_embedding(self, x, edge_index, edge_weight=None):
         adj_lp, adj_hp = self.get_adj(edge_index)
-        h_lp, _ = self.online_encoder(x, adj_lp, edge_weight)
-        h_hp, _ = self.online_encoder(x, adj_hp, edge_weight)
-        return h_lp, h_hp
+        emb_lp, _ = self.online_encoder(x, adj_lp, edge_weight)
+        emb_hp, _ = self.online_encoder(x, adj_hp, edge_weight)
+        return emb_lp, emb_hp
 
 
 
