@@ -6,7 +6,7 @@ import dgl
 import random
 
 from data_loader import load_data
-from model_infonce import *
+from model_physics import *
 from utils import *
 
 import GCL.losses as L
@@ -15,7 +15,6 @@ import torch_geometric.transforms as T
 
 from tqdm import tqdm
 from torch.optim import Adam
-from GCL.models import DualBranchContrast
 
 import time
 
@@ -36,17 +35,18 @@ def train(encoder_model, contrast_model, features, edges, optimizer, alpha, beta
     encoder_model.train()
     optimizer.zero_grad()
 
-    _, _, h1_lp_pred, h1_hp_pred, h2_lp_pred, h2_hp_pred = encoder_model(features, edges)
-    l1 = contrast_model(h1 = h1_lp_pred, h2 = h2_lp_pred)
-    l2 = contrast_model(h1 = h1_hp_pred, h2 = h2_hp_pred)
-    cross_view_loss = l1 * alpha + l2 * beta
-    cross_pass_loss = contrast_model(h1 = h1_lp_pred, h2 = h1_hp_pred)
-    loss = cross_view_loss + cross_pass_loss * gamma
+    # h1_lp, h1_hp, s1_lp, s1_hp, z2_lp, z2_hp = encoder_model(features, edges)
+    h1_lp, z2_lp = encoder_model(features, edges)
+    lp_loss = contrast_model(h_pred = h1_lp, h_target = z2_lp.detach())
+    # hp_loss = contrast_model(h_pred = h1_hp, h_target = z2_hp.detach())
+    # cross_view_loss = lp_loss * alpha + hp_loss * beta
+    # cross_pass_loss = (contrast_model(h_pred = s1_lp, h_target = z2_hp) + contrast_model(h_pred = s1_hp, h_target = z2_lp)) * (gamma/2)
+    # loss = cross_view_loss + cross_pass_loss
     
-    loss.backward()
+    lp_loss.backward()
     optimizer.step()
-    # encoder_model.update_target_encoder(0.0)
-    return loss.item()
+    encoder_model.update_target_encoder(0.0)
+    return lp_loss.item()
 
 
 def main(args):
@@ -67,7 +67,7 @@ def main(args):
         # gconv = GConv(input_dim=nfeats, hidden_dim=256, num_layers=2).to(device)
         gconv = GConv(nlayers=args.nlayers_enc, nlayers_proj=args.nlayers_proj, in_dim=nfeats, emb_dim=args.emb_dim, proj_dim=args.proj_dim, dropout=args.dropout, sparse=args.sparse, batch_size=args.cl_batch_size).to(device)
         encoder_model = Encoder(encoder=gconv, augmentor1=aug1, augmentor2=aug2, nnodes=nnodes, hidden_dim=args.proj_dim, sparse=args.sparse, dropout=args.dropout).to(device)
-        contrast_model = DualBranchContrast(loss=L.InfoNCE(tau=0.2), mode='L2L').to(device)
+        contrast_model = CrossViewContrast().to(device)
         optimizer = Adam(encoder_model.parameters(), lr=0.001)
 
         features = features.to(device)
@@ -85,8 +85,9 @@ def main(args):
             if epoch % args.eval_freq == 0:
                 encoder_model.eval()
                 # h_lp, h_hp, _, _, _, _ = encoder_model(features, edges)
-                h_lp, h_hp = encoder_model.get_embedding(features, edges)
-                z = torch.cat([h_lp * args.alpha, h_hp * args.beta], dim=1)
+                emb_lp = encoder_model.get_embedding(features, edges)
+                # z = torch.cat([emb_lp * args.alpha, emb_hp * args.beta], dim=1)
+                z = emb_lp
                 
                 cur_split = 0 if (train_mask.shape[1]==1) else (trial % train_mask.shape[1])
                 acc_test, acc_val = eval_test_mode(z, labels, train_mask[:, cur_split],

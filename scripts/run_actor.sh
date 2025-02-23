@@ -35,7 +35,7 @@ python main_test.py -dataset actor -ntrials 10 -sparse 1 -epochs 1000 -cl_batch_
 # Run:10 | ACC:32.99+-1.06 | ACC2:33.74+-0.98 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.6 -beta 0.5 -gamma 0.5
 
 # Run:10 | ACC:32.51+-0.93 | ACC2:34.07+-1.05 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.7 -beta 0.5 -gamma 0.5
-# Run:10 | ACC:32.80+-0.99 | ACC2:34.45+-0.74 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.8 -beta 0.5 -gamma 0.5
+# Run:10 | ACC:32.80+-0.99 | ACC2:34.45+-0.74 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.8 -beta 0.5 -gamma 0.5 ***
 # Run:10 | ACC:32.92+-1.59 | ACC2:34.02+-0.78 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.9 -beta 0.5 -gamma 0.5
 
 
@@ -77,7 +77,7 @@ python main_test.py -dataset actor -ntrials 10 -sparse 1 -epochs 1000 -cl_batch_
 # Trial:8 | ACC:32.50 | ACC2:34.21
 # Trial:9 | ACC:34.14 | ACC2:35.39
 # Run:10 | ACC:32.92+-0.93 | ACC2:34.14+-0.67 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.3 -beta 1.0  -gamma 0.0
-# Run:10 | ACC:32.91+-0.84 | ACC2:34.54+-0.74 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.4 -beta 1.0  -gamma 0.0
+# Run:10 | ACC:32.91+-0.84 | ACC2:34.54+-0.74 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.4 -beta 1.0  -gamma 0.0 ***
 # Run:10 | ACC:33.30+-1.36 | ACC2:34.25+-0.74 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.5 -beta 1.0  -gamma 0.0
 
 # Run:10 | ACC:33.06+-1.12 | ACC2:34.33+-0.85 | -nlayers_proj 2 -maskfeat_rate_1 0.1 -maskfeat_rate_2 0.1 -dropedge_rate_1 0.1 -dropedge_rate_2 0.1 -dropnode_rate_1 0.0 -dropnode_rate_2 0.0 -lr 0.001 -eval_freq 50 -alpha 0.3 -beta 0.5 -gamma 0.0
